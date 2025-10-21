@@ -186,4 +186,6 @@ Employee Telebirr numbers must be in format: **251XXXXXXXXX** (e.g., 25191234567
 
 ## License
 
-ISC License
+Apache License 2.0
+
+You may use and modify this software for personal, educational, or non-commercial purposes only. You must always credit the original authors. Commercial use requires explicit permission.

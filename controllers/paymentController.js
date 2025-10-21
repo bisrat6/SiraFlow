@@ -74,6 +74,49 @@ const getPayment = async (req, res) => {
   }
 };
 
+// Get payments summary for employer/company
+const getPaymentsSummary = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query || {};
+
+    // Get company
+    const company = await Company.findOne({ employerId: req.user._id });
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    // Get employees for this company
+    const employees = await Employee.find({ companyId: company._id });
+    const employeeIds = employees.map(emp => emp._id);
+
+    // Build query
+    const query = { employeeId: { $in: employeeIds } };
+    if (startDate) query['period.startDate'] = { $gte: new Date(startDate) };
+    if (endDate) query['period.endDate'] = { ...(query['period.endDate'] || {}), $lte: new Date(endDate) };
+
+    const payments = await Payment.find(query).select('amount status');
+
+    const totalPayments = payments.length;
+    const totalAmount = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const pendingPayments = payments.filter(p => p.status === 'pending').length;
+    const processingPayments = payments.filter(p => p.status === 'processing').length;
+    const completedPayments = payments.filter(p => p.status === 'completed').length;
+    const failedPayments = payments.filter(p => p.status === 'failed').length;
+
+    return res.json({
+      totalPayments,
+      totalAmount,
+      pendingPayments,
+      processingPayments,
+      completedPayments,
+      failedPayments
+    });
+  } catch (error) {
+    console.error('Get payments summary error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Process payroll (calculate only; do not auto-initiate)
 const processPayroll = async (req, res) => {
   try {
@@ -189,8 +232,8 @@ const approvePaymentsForPeriod = async (req, res) => {
     };
 
     if (startDate && endDate) {
-      query['period.startDate'] = new Date(startDate);
-      query['period.endDate'] = new Date(endDate);
+      query['period.startDate'] = { $gte: new Date(startDate) };
+      query['period.endDate'] = { $lte: new Date(endDate) };
     }
 
     const pendingToApprove = await Payment.find(query);
@@ -444,6 +487,52 @@ const getMyPayments = async (req, res) => {
   }
 };
 
+// Get my payment summary (employee only)
+const getMyPaymentsSummary = async (req, res) => {
+  try {
+    // Get employee record
+    const employee = await Employee.findOne({ userId: req.user._id });
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee record not found' });
+    }
+
+    // Get all payments for this employee
+    const allPayments = await Payment.find({ employeeId: employee._id });
+
+    // Calculate summary statistics
+    const totalAmount = allPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
+    const approvedPayments = allPayments.filter(p => p.status === 'approved').length;
+    const processingPayments = allPayments.filter(p => p.status === 'processing').length;
+    const completedPayments = allPayments.filter(p => p.status === 'completed').length;
+    const failedPayments = allPayments.filter(p => p.status === 'failed').length;
+
+    // Calculate amounts by status
+    const pendingAmount = allPayments
+      .filter(p => p.status === 'pending')
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+    
+    const completedAmount = allPayments
+      .filter(p => p.status === 'completed')
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    res.json({
+      totalAmount,
+      completedAmount,
+      pendingAmount,
+      pendingPayments,
+      approvedPayments,
+      processingPayments,
+      completedPayments,
+      failedPayments,
+      totalPayments: allPayments.length
+    });
+  } catch (error) {
+    console.error('Get my payments summary error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // ============================================
 // MODULE EXPORTS
 // ============================================
@@ -452,9 +541,11 @@ module.exports = {
   // Payment operations
   getPayments,
   getPayment,
+  getPaymentsSummary,
   approvePayment,
   approvePaymentsForPeriod,
   getMyPayments,
+  getMyPaymentsSummary,
   
   // Payroll processing
   processPayroll,

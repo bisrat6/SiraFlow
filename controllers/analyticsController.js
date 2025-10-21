@@ -32,33 +32,33 @@ const generateAttendanceReport = async (req, res) => {
     .populate('employeeId', 'name hourlyRate')
     .sort({ clockIn: 1 });
 
-    // Generate report data
-    const report = {
+    // Calculate total hours
+    const totalHoursWorked = timeLogs.reduce((sum, log) => sum + (log.duration || 0), 0);
+
+    // Generate employee stats
+    const employeeStats = employees.map(emp => {
+      const empLogs = timeLogs.filter(log => log.employeeId._id.toString() === emp._id.toString());
+      const totalHours = empLogs.reduce((sum, log) => sum + (log.duration || 0), 0);
+      const daysWorked = new Set(empLogs.map(log => new Date(log.clockIn).toDateString())).size;
+      
+      return {
+        employeeId: emp._id,
+        employeeName: emp.name,
+        totalHours: totalHours,
+        daysWorked: daysWorked,
+        timeLogsCount: empLogs.length
+      };
+    });
+
+    res.json({
+      totalHoursWorked,
+      employeeStats,
+      totalEmployees: employees.length,
+      totalTimeLogs: timeLogs.length,
       period: {
         start: periodStart,
         end: periodEnd
-      },
-      summary: {
-        totalEmployees: employees.length,
-        totalTimeLogs: timeLogs.length,
-        totalHours: timeLogs.reduce((sum, log) => sum + (log.duration || 0), 0),
-        totalPayments: timeLogs.reduce((sum, log) => sum + (log.regularHours * log.employeeId.hourlyRate || 0), 0)
-      },
-      employees: employees.map(emp => {
-        const empLogs = timeLogs.filter(log => log.employeeId._id.toString() === emp._id.toString());
-        return {
-          id: emp._id,
-          name: emp.name,
-          totalHours: empLogs.reduce((sum, log) => sum + (log.duration || 0), 0),
-          totalPayments: empLogs.reduce((sum, log) => sum + (log.regularHours * emp.hourlyRate || 0), 0),
-          timeLogs: empLogs.length
-        };
-      })
-    };
-
-    res.json({
-      message: 'Attendance report generated successfully',
-      report
+      }
     });
   } catch (error) {
     console.error('Generate attendance report error:', error);

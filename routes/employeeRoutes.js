@@ -9,7 +9,7 @@ const router = express.Router();
 const addEmployeeValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('name').notEmpty().withMessage('Employee name is required'),
-  body('hourlyRate').isFloat({ min: 0 }).withMessage('Hourly rate must be a positive number'),
+  body('jobRoleId').isMongoId().withMessage('Valid jobRoleId is required'),
   body('department').optional().trim(),
   body('position').optional().trim(),
   body('telebirrMsisdn').matches(/^251[0-9]{9}$/).withMessage('Telebirr number must be in format: 251XXXXXXXXX'),
@@ -21,6 +21,7 @@ const updateEmployeeValidation = [
   body('name').optional().notEmpty().withMessage('Employee name cannot be empty'),
   body('email').optional().isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('hourlyRate').optional().isFloat({ min: 0 }).withMessage('Hourly rate must be a positive number'),
+  body('jobRoleId').optional().isMongoId().withMessage('jobRoleId must be a valid id'),
   body('department').optional().trim(),
   body('position').optional().trim(),
   body('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),

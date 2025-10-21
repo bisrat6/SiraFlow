@@ -69,9 +69,7 @@ export const employeeApi = {
   add: (data: { 
     name: string; 
     email: string; 
-    hourlyRate: number; 
-    department?: string; 
-    position?: string; 
+    jobRoleId: string;
     telebirrMsisdn: string; 
     phoneNumber?: string; 
     address?: string; 
@@ -81,9 +79,7 @@ export const employeeApi = {
   update: (id: string, data: Partial<{
     name: string;
     email: string;
-    hourlyRate: number;
-    department: string;
-    position: string;
+    jobRoleId: string;
     isActive: boolean;
     telebirrMsisdn: string;
     phoneNumber: string;
@@ -116,6 +112,7 @@ export const paymentApi = {
   get: (paymentId: string) => api.get(`/payments/${paymentId}`),
   getMyPayments: (params?: { status?: string; page?: number; limit?: number }) =>
     api.get('/payments/my', { params }),
+  getMyPaymentsSummary: () => api.get('/payments/my/summary'),
   approveSingle: (paymentId: string) => api.post('/payments/approve', { paymentId }),
   approveBulk: (data: { startDate?: string; endDate?: string }) => api.post('/payments/approve/bulk', data),
   retryPayment: (paymentId: string) => api.post('/payments/retry', { paymentId }),

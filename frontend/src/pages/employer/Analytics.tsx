@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, BarChart3, TrendingUp, Users, Clock, DollarSign, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-import { analyticsApi } from '@/lib/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { analyticsApi, paymentApi } from '@/lib/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 
 const Analytics = () => {
   const navigate = useNavigate();
@@ -15,6 +17,28 @@ const Analytics = () => {
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [paymentSummary, setPaymentSummary] = useState<any>(null);
+  const [analyticsType, setAnalyticsType] = useState('attendance');
+
+  useEffect(() => {
+    // Set default date range to last 30 days
+    const endDate = new Date();
+    const startDate = subDays(endDate, 30);
+    setPeriodStart(format(startDate, 'yyyy-MM-dd'));
+    setPeriodEnd(format(endDate, 'yyyy-MM-dd'));
+    
+    // Load initial data
+    fetchPaymentSummary();
+  }, []);
+
+  const fetchPaymentSummary = async () => {
+    try {
+      const response = await paymentApi.getSummary();
+      setPaymentSummary(response.data);
+    } catch (error: any) {
+      console.error('Failed to fetch payment summary:', error);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!periodStart || !periodEnd) {
@@ -24,10 +48,18 @@ const Analytics = () => {
     
     setLoading(true);
     try {
-      const response = await analyticsApi.generateAttendance({
-        periodStart: new Date(periodStart).toISOString(),
-        periodEnd: new Date(periodEnd).toISOString(),
-      });
+      let response;
+      if (analyticsType === 'attendance') {
+        response = await analyticsApi.generateAttendance({
+          periodStart: new Date(periodStart).toISOString(),
+          periodEnd: new Date(periodEnd).toISOString(),
+        });
+      } else {
+        response = await analyticsApi.get({
+          type: analyticsType,
+          period: `${periodStart}_${periodEnd}`
+        });
+      }
       setAnalyticsData(response.data);
       toast.success('Analytics generated!');
     } catch (error: any) {
@@ -35,6 +67,28 @@ const Analytics = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const setQuickDateRange = (range: string) => {
+    const endDate = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case 'week':
+        startDate = subDays(endDate, 7);
+        break;
+      case 'month':
+        startDate = startOfMonth(endDate);
+        break;
+      case 'quarter':
+        startDate = subDays(endDate, 90);
+        break;
+      default:
+        startDate = subDays(endDate, 30);
+    }
+    
+    setPeriodStart(format(startDate, 'yyyy-MM-dd'));
+    setPeriodEnd(format(endDate, 'yyyy-MM-dd'));
   };
 
   const chartData = analyticsData?.employeeStats?.map((stat: any) => ({
@@ -58,16 +112,82 @@ const Analytics = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Payment Summary Cards */}
+        {paymentSummary && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <Card className="shadow-elegant gradient-card">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Paid</p>
+                    <p className="text-2xl font-bold">${(paymentSummary.totalAmount || 0).toFixed(2)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-elegant gradient-card">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Pending</p>
+                    <p className="text-2xl font-bold">{paymentSummary.pendingPayments || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-elegant gradient-card">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Employees</p>
+                    <p className="text-2xl font-bold">{paymentSummary.totalEmployees || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-elegant gradient-card">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">This Month</p>
+                    <p className="text-2xl font-bold">{paymentSummary.thisMonthPayments || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card className="shadow-elegant gradient-card mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
               Generate Analytics
             </CardTitle>
-            <CardDescription>Select a time period to analyze attendance</CardDescription>
+            <CardDescription>Select a time period and analytics type</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Analytics Type</Label>
+                <Select value={analyticsType} onValueChange={setAnalyticsType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="attendance">Attendance</SelectItem>
+                    <SelectItem value="payroll">Payroll</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="start">Period Start</Label>
                 <Input
@@ -91,6 +211,19 @@ const Analytics = () => {
                   {loading ? 'Generating...' : 'Generate'}
                 </Button>
               </div>
+            </div>
+            
+            {/* Quick Date Range Buttons */}
+            <div className="mt-4 flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setQuickDateRange('week')}>
+                Last 7 Days
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setQuickDateRange('month')}>
+                This Month
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setQuickDateRange('quarter')}>
+                Last 90 Days
+              </Button>
             </div>
           </CardContent>
         </Card>

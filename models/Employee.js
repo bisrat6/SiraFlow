@@ -22,9 +22,13 @@ const employeeSchema = new mongoose.Schema({
     ref: 'Company',
     required: true
   },
+  jobRoleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'JobRole',
+  },
   hourlyRate: {
     type: Number,
-    required: true,
+    required: false,
     min: 0
   },
   position: {

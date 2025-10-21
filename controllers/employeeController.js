@@ -12,7 +12,7 @@ const addEmployee = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, name, hourlyRate, department, position, telebirrMsisdn, phoneNumber, address } = req.body;
+    const { email, name, telebirrMsisdn, phoneNumber, address, jobRoleId } = req.body;
 
     // Get company for current employer
     const company = await Company.findOne({ employerId: req.user._id });
@@ -49,9 +49,7 @@ const addEmployee = async (req, res) => {
       companyId: company._id,
       name,
       email,
-      hourlyRate,
-      department,
-      position,
+      jobRoleId,
       telebirrMsisdn,
       phoneNumber,
       address,
@@ -76,9 +74,7 @@ const addEmployee = async (req, res) => {
         id: employee._id,
         name: employee.name,
         email: employee.email,
-        hourlyRate: employee.hourlyRate,
-        department: employee.department,
-        position: employee.position,
+        jobRoleId: employee.jobRoleId,
         telebirrMsisdn: employee.telebirrMsisdn,
         phoneNumber: employee.phoneNumber,
         address: employee.address,
@@ -137,7 +133,7 @@ const updateEmployee = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, hourlyRate, department, position, isActive, telebirrMsisdn, phoneNumber, address, email } = req.body;
+    const { name, hourlyRate, department, position, isActive, telebirrMsisdn, phoneNumber, address, email, jobRoleId } = req.body;
 
     const employee = await Employee.findById(req.params.id).populate(
       "companyId",
@@ -153,12 +149,23 @@ const updateEmployee = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // Update fields
+    // Update jobRole and derive rates if jobRoleId is provided
+    if (jobRoleId) {
+      const jobRole = await JobRole.findById(jobRoleId);
+      if (!jobRole) {
+        return res.status(404).json({ message: "Job role not found" });
+      }
+      employee.jobRoleId = jobRoleId;
+      employee.hourlyRate = jobRole.defaultRates.base;
+      employee.position = jobRole.name;
+    }
+
+    // Update other fields
     if (name) employee.name = name;
     if (email) employee.email = email;
-    if (hourlyRate !== undefined) employee.hourlyRate = hourlyRate;
+    if (hourlyRate !== undefined && !jobRoleId) employee.hourlyRate = hourlyRate; // Only if not updating via jobRole
     if (department !== undefined) employee.department = department;
-    if (position !== undefined) employee.position = position;
+    if (position !== undefined && !jobRoleId) employee.position = position; // Only if not updating via jobRole
     if (isActive !== undefined) employee.isActive = isActive;
     if (telebirrMsisdn !== undefined) employee.telebirrMsisdn = telebirrMsisdn;
     if (phoneNumber !== undefined) employee.phoneNumber = phoneNumber;

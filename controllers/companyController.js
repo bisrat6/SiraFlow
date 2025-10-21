@@ -17,6 +17,15 @@ const createCompany = async (req, res) => {
       return res.status(400).json({ message: 'Company already exists for this employer' });
     }
 
+    // Validate unique merchant key if provided
+    const merchantKey = arifpayMerchantKey ? arifpayMerchantKey.trim() : 'pending_setup';
+    if (merchantKey !== 'pending_setup') {
+      const existingWithKey = await Company.findOne({ arifpayMerchantKey: merchantKey });
+      if (existingWithKey) {
+        return res.status(400).json({ message: 'This merchant key is already in use by another company' });
+      }
+    }
+
     // Create company - merchant key can be added later
     const company = new Company({
       name,
@@ -25,7 +34,7 @@ const createCompany = async (req, res) => {
       paymentCycle: paymentCycle || 'monthly',
       bonusRateMultiplier: bonusRateMultiplier || 1.5,
       maxDailyHours: maxDailyHours || 8,
-      arifpayMerchantKey: arifpayMerchantKey ? arifpayMerchantKey.trim() : 'pending_setup'
+      arifpayMerchantKey: merchantKey
     });
 
     await company.save();
@@ -96,6 +105,17 @@ const updateCompany = async (req, res) => {
     
     if (!company) {
       return res.status(404).json({ message: 'Company not found' });
+    }
+
+    // Validate unique merchant key if updating
+    if (arifpayMerchantKey && arifpayMerchantKey !== 'pending_setup') {
+      const existingWithKey = await Company.findOne({ 
+        arifpayMerchantKey, 
+        _id: { $ne: company._id } 
+      });
+      if (existingWithKey) {
+        return res.status(400).json({ message: 'This merchant key is already in use by another company' });
+      }
     }
 
     // Update fields

@@ -16,7 +16,8 @@ import {
   Building2,
   Calendar,
   BarChart3,
-  PieChart
+  PieChart,
+  Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentApi, companyApi, employeeApi } from '@/lib/api';
@@ -27,6 +28,7 @@ const PayrollSummary = () => {
   const [summary, setSummary] = useState<any>(null);
   const [company, setCompany] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState('month');
   const [customStartDate, setCustomStartDate] = useState('');
@@ -40,7 +42,8 @@ const PayrollSummary = () => {
     await Promise.all([
       fetchSummary(),
       fetchCompany(),
-      fetchEmployees()
+      fetchEmployees(),
+      fetchRecentActivities()
     ]);
   };
 
@@ -105,8 +108,64 @@ const PayrollSummary = () => {
   };
 
   const handleExport = () => {
-    // TODO: Implement export functionality
-    toast.info('Export functionality coming soon');
+    if (!summary || !company) {
+      toast.error('No data available to export');
+      return;
+    }
+
+    try {
+      // Prepare CSV data
+      const csvRows = [];
+      
+      // Header
+      csvRows.push('Payroll Summary Report');
+      csvRows.push(`Company: ${company.name}`);
+      csvRows.push(`Period: ${getDateRangeLabel()}`);
+      csvRows.push(`Generated: ${format(new Date(), 'PPpp')}`);
+      csvRows.push('');
+      
+      // Summary Statistics
+      csvRows.push('Summary Statistics');
+      csvRows.push('Metric,Value');
+      csvRows.push(`Total Amount,${summary.totalAmount || 0}`);
+      csvRows.push(`Pending Payments,${summary.pendingPayments || 0}`);
+      csvRows.push(`Completed Payments,${summary.completedPayments || 0}`);
+      csvRows.push(`Failed Payments,${summary.failedPayments || 0}`);
+      csvRows.push(`Processing Payments,${summary.processingPayments || 0}`);
+      csvRows.push(`Total Employees,${summary.totalEmployees || 0}`);
+      csvRows.push('');
+      
+      // Employee Details
+      if (employees.length > 0) {
+        csvRows.push('Employee Details');
+        csvRows.push('Name,Email,Job Role,Status');
+        employees.forEach(emp => {
+          const jobRole = emp.jobRoleId?.name || 'N/A';
+          csvRows.push(`"${emp.name}","${emp.email}","${jobRole}","${emp.isActive ? 'Active' : 'Inactive'}"`);
+        });
+      }
+      
+      // Create CSV content
+      const csvContent = csvRows.join('\n');
+      
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `payroll_summary_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Report exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export report');
+    }
   };
 
   const getDateRangeLabel = () => {
@@ -131,6 +190,29 @@ const PayrollSummary = () => {
     if (previous === 0) return current > 0 ? '+100%' : '0%';
     const change = ((current - previous) / previous) * 100;
     return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+  };
+
+  const fetchRecentActivities = async () => {
+    try {
+      // For now, we'll create mock recent activities based on payments
+      // In a real implementation, you'd have a dedicated activities endpoint
+      const response = await paymentApi.list({ limit: 10 });
+      const payments = response.data.payments || [];
+      
+      const activities = payments.map((payment: any) => ({
+        id: payment._id,
+        type: 'payment',
+        action: payment.status === 'completed' ? 'completed' : payment.status === 'approved' ? 'approved' : 'created',
+        description: `Payment ${payment.status === 'completed' ? 'completed' : payment.status === 'approved' ? 'approved' : 'created'} for ${payment.employeeId?.name || 'Employee'}`,
+        amount: payment.amount,
+        timestamp: payment.updatedAt || payment.createdAt,
+        status: payment.status
+      }));
+      
+      setRecentActivities(activities);
+    } catch (error: any) {
+      console.error('Failed to fetch recent activities:', error);
+    }
   };
 
   return (
@@ -263,11 +345,11 @@ const PayrollSummary = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Amount</p>
-                    <p className="text-3xl font-bold">${summary.totalAmountPaid?.toFixed(2) || '0.00'}</p>
+                    <p className="text-3xl font-bold">${(summary.totalAmount || 0).toFixed(2)}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      {getTrendIcon(summary.totalAmountPaid || 0, summary.previousTotalAmountPaid || 0)}
+                      {getTrendIcon(summary.totalAmount || 0, summary.previousTotalAmount || 0)}
                       <span className="text-sm text-muted-foreground">
-                        {getTrendPercentage(summary.totalAmountPaid || 0, summary.previousTotalAmountPaid || 0)}
+                        {getTrendPercentage(summary.totalAmount || 0, summary.previousTotalAmount || 0)}
                       </span>
                     </div>
                   </div>
@@ -374,8 +456,8 @@ const PayrollSummary = () => {
                   <div className="flex items-center justify-between">
                     <span>Average Payment</span>
                     <span className="font-semibold">
-                      ${summary.totalAmountPaid && summary.totalPayments 
-                        ? (summary.totalAmountPaid / summary.totalPayments).toFixed(2) 
+                      ${summary.totalAmount && summary.totalPayments 
+                        ? (summary.totalAmount / summary.totalPayments).toFixed(2) 
                         : '0.00'}
                     </span>
                   </div>
@@ -393,16 +475,38 @@ const PayrollSummary = () => {
         <Card className="shadow-elegant mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
+              <Activity className="w-5 h-5" />
               Recent Activity
             </CardTitle>
             <CardDescription>Latest payroll activities</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Recent activity will appear here</p>
-            </div>
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">No recent activity</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{activity.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(activity.timestamp), 'MMM dd, yyyy HH:mm')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">${activity.amount?.toFixed(2) || '0.00'}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{activity.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

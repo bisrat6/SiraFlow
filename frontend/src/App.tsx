@@ -18,6 +18,7 @@ import PayrollSummary from "./pages/employer/PayrollSummary";
 import Analytics from "./pages/employer/Analytics";
 import TimeLogs from "./pages/employee/TimeLogs";
 import Payments from "./pages/employee/Payments";
+import Me from "./pages/Me";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { isAuthenticated, getCurrentUser } from "./lib/auth";
 
@@ -99,6 +100,13 @@ const App = () => {
             <Route path="/employee/payments" element={
               <ProtectedRoute requiredRole="employee">
                 <Payments />
+              </ProtectedRoute>
+            } />
+            
+            {/* Profile Routes */}
+            <Route path="/me" element={
+              <ProtectedRoute>
+                <Me />
               </ProtectedRoute>
             } />
             

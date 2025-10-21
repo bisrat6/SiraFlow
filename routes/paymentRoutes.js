@@ -4,6 +4,7 @@ const { body } = require('express-validator');
 const {
   getPayments,
   getPayment,
+  getPaymentsSummary,
   processPayroll,
   getPayrollSummary,
   handleWebhook,
@@ -11,7 +12,8 @@ const {
   retryPayment,
   approvePayment,
   approvePaymentsForPeriod,
-  getMyPayments
+  getMyPayments,
+  getMyPaymentsSummary
 } = require('../controllers/paymentController');
 
 const { authMiddleware, employerOnly, employeeOnly } = require('../middleware/authMiddleware');
@@ -34,6 +36,9 @@ const approveBulkValidation = [
 // Get my payments (employee only)
 router.get('/my', authMiddleware, employeeOnly, getMyPayments);
 
+// Get my payments summary (employee only)
+router.get('/my/summary', authMiddleware, employeeOnly, getMyPaymentsSummary);
+
 // ============================================
 // EMPLOYER ROUTES (Authentication Required)
 // ============================================
@@ -47,8 +52,8 @@ router.post('/approve/bulk', authMiddleware, employerOnly, approveBulkValidation
 // Get all payments for company
 router.get('/', authMiddleware, employerOnly, getPayments);
 
-// Get payroll summary (define BEFORE :id to avoid param capture)
-router.get('/summary', authMiddleware, employerOnly, getPayrollSummary);
+// Get payments summary (define BEFORE :id to avoid param capture)
+router.get('/summary', authMiddleware, employerOnly, getPaymentsSummary);
 
 // Get single payment details
 router.get('/:id', authMiddleware, employerOnly, getPayment);

@@ -2,6 +2,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 const Payment = require("../models/Payment");
 const Employee = require("../models/Employee");
+const TimeLog = require("../models/TimeLog");
 
 // SECURITY NOTE: Never log merchant keys or API keys in production
 // Use maskSensitiveData() function for safe logging
@@ -303,6 +304,13 @@ const handleB2CWebhook = async (webhookData) => {
         payment.arifpayTransactionId = transaction?.transactionId || payment.arifpayTransactionId;
         payment.paymentDate = new Date();
         console.log(`[B2C Webhook] Payment ${payment._id} completed`);
+        
+        // Mark associated time logs as paid
+        await TimeLog.updateMany(
+          { _id: { $in: payment.timeLogIds } },
+          { status: 'paid' }
+        );
+        console.log(`[B2C Webhook] Marked ${payment.timeLogIds.length} time logs as paid`);
         break;
 
       case "PENDING":

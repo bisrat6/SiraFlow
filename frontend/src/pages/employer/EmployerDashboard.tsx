@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, Clock, DollarSign, BarChart3, LogOut, CreditCard, PieChart, TrendingUp } from 'lucide-react';
+import { Building2, Users, Clock, DollarSign, BarChart3, LogOut, CreditCard, PieChart, TrendingUp, User } from 'lucide-react';
 import { removeToken, getCurrentUser } from '@/lib/auth';
 import { toast } from 'sonner';
 
@@ -78,6 +78,10 @@ const EmployerDashboard = () => {
               <p className="text-sm font-medium">{user?.name}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/me')}>
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout

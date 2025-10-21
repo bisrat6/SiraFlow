@@ -56,14 +56,7 @@ const companySchema = new mongoose.Schema({
 // Ensure one company per employer
 companySchema.index({ employerId: 1 }, { unique: true });
 
-// Ensure unique merchant keys to prevent conflicts (but allow multiple 'pending_setup')
-companySchema.index({ 
-  arifpayMerchantKey: 1 
-}, { 
-  unique: true, 
-  partialFilterExpression: { 
-    arifpayMerchantKey: { $ne: 'pending_setup' } 
-  } 
-});
+// Index for arifpayMerchantKey for faster lookups (not unique to allow multiple 'pending_setup')
+companySchema.index({ arifpayMerchantKey: 1 });
 
 module.exports = mongoose.model('Company', companySchema);

@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator');
 const TimeLog = require('../models/TimeLog');
 const Employee = require('../models/Employee');
 const Company = require('../models/Company');
+const Payment = require('../models/Payment');
+const payrollService = require('../services/payrollService');
 
 // Clock in
 const clockIn = async (req, res) => {
@@ -250,6 +252,7 @@ const approveTimeLog = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // Get current clock status
 const getClockStatus = async (req, res) => {

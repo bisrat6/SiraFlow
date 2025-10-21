@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Coffee, LogOut, DollarSign, Calendar } from 'lucide-react';
+import { Clock, Coffee, LogOut, DollarSign, Calendar, User } from 'lucide-react';
 import { removeToken, getCurrentUser } from '@/lib/auth';
 import { timeLogApi } from '@/lib/api';
 import { toast } from 'sonner';
@@ -109,6 +109,10 @@ const EmployeeDashboard = () => {
               <p className="text-sm font-medium">{user?.name}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/me')}>
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout

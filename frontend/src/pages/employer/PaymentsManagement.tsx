@@ -56,7 +56,9 @@ const PaymentsManagement = () => {
       if (statusFilter !== 'all') params.status = statusFilter;
       if (employeeFilter !== 'all') params.employeeId = employeeFilter;
       
+      console.log('Fetching payments with params:', params);
       const response = await paymentApi.list(params);
+      console.log('Payments response:', response.data);
       setPayments(response.data.payments || []);
     } catch (error: any) {
       console.error('Fetch payments error:', error);
@@ -419,7 +421,7 @@ const PaymentsManagement = () => {
                   <DollarSign className="w-5 h-5 text-green-600" />
                   <div>
                     <p className="text-sm text-muted-foreground">Total Paid</p>
-                    <p className="text-2xl font-bold">${summary.totalAmountPaid?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl font-bold">${(summary.totalAmount || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -440,8 +442,8 @@ const PaymentsManagement = () => {
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-purple-600" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Employees</p>
-                    <p className="text-2xl font-bold">{summary.employeeCount || 0}</p>
+                    <p className="text-sm text-muted-foreground">Processing</p>
+                    <p className="text-2xl font-bold">{summary.processingPayments || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -488,6 +490,7 @@ const PaymentsManagement = () => {
                         <SelectItem value="all">All Status</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
                         <SelectItem value="failed">Failed</SelectItem>
                       </SelectContent>
@@ -584,13 +587,6 @@ const PaymentsManagement = () => {
                                   Approve
                                 </Button>
                               )}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => navigate(`/employer/payments/${payment._id}`)}
-                              >
-                                View
-                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>

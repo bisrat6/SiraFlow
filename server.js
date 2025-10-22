@@ -1,8 +1,8 @@
-const app = require('./app');
-const connectDB = require('./config/db');
-const { initializeSchedulers } = require('./services/scheduler');
-const { corsOptions } = require('./middleware/securityMiddleware'); // import corsOptions
-const cors = require('cors');
+const app = require("./app");
+const connectDB = require("./config/db");
+const { initializeSchedulers } = require("./services/scheduler");
+const { corsOptions } = require("./middleware/securityMiddleware"); // import corsOptions
+const cors = require("cors");
 
 // Use CORS with your configured options
 app.use(cors(corsOptions));
@@ -19,10 +19,10 @@ initializeSchedulers();
 const server = app.listen(PORT, () => {
   console.log(`
   ========================================
-  SmartPay Backend Server Started
+  SiraFlow Backend Server Started
   ========================================
   Port: ${PORT}
-  Environment: ${process.env.NODE_ENV || 'development'}
+  Environment: ${process.env.NODE_ENV || "development"}
   Health Check: http://localhost:${PORT}/health
   API Documentation: http://localhost:${PORT}/api
   ========================================
@@ -30,30 +30,30 @@ const server = app.listen(PORT, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully");
   server.close(() => {
-    console.log('Process terminated');
+    console.log("Process terminated");
     process.exit(0);
   });
 });
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down gracefully");
   server.close(() => {
-    console.log('Process terminated');
+    console.log("Process terminated");
     process.exit(0);
   });
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
   process.exit(1);
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
   process.exit(1);
 });

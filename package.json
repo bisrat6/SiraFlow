@@ -1,5 +1,5 @@
 {
-  "name": "smartpay-backend",
+  "name": "siraflow-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -22,7 +22,7 @@
   ],
   "author": "",
   "license": "ISC",
-  "description": "SmartPay Backend - Automated payroll system with time tracking and Arifpay integration",
+  "description": "SiraFlow Backend - Automated payroll system with time tracking and Arifpay integration",
   "dependencies": {
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",

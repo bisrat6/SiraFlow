@@ -1,15 +1,36 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Building2, Plus, Edit, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { companyApi, jobRoleApi } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Building2, Plus, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { companyApi, jobRoleApi } from "@/lib/api";
 
 const CompanyManagement = () => {
   const navigate = useNavigate();
@@ -17,22 +38,22 @@ const CompanyManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [jobRoleDialogOpen, setJobRoleDialogOpen] = useState(false);
   const [editCompanyDialogOpen, setEditCompanyDialogOpen] = useState(false);
-  
+
   // Company data
   const [company, setCompany] = useState<any>(null);
   const [jobRoles, setJobRoles] = useState<any[]>([]);
-  
+
   // Company form
-  const [companyName, setCompanyName] = useState('');
-  const [employerName, setEmployerName] = useState('');
-  const [arifpayMerchantKey, setArifpayMerchantKey] = useState('');
-  const [paymentCycle, setPaymentCycle] = useState('monthly');
-  
+  const [companyName, setCompanyName] = useState("");
+  const [employerName, setEmployerName] = useState("");
+  const [arifpayMerchantKey, setArifpayMerchantKey] = useState("");
+  const [paymentCycle, setPaymentCycle] = useState("monthly");
+
   // Job role form
-  const [roleName, setRoleName] = useState('');
-  const [baseRate, setBaseRate] = useState('');
-  const [overtimeRate, setOvertimeRate] = useState('');
-  const [roleBonus, setRoleBonus] = useState('');
+  const [roleName, setRoleName] = useState("");
+  const [baseRate, setBaseRate] = useState("");
+  const [overtimeRate, setOvertimeRate] = useState("");
+  const [roleBonus, setRoleBonus] = useState("");
 
   useEffect(() => {
     fetchCompanyData();
@@ -45,7 +66,7 @@ const CompanyManagement = () => {
       setCompany(response.data.company);
     } catch (error: any) {
       if (error?.response?.status !== 404) {
-        console.error('Failed to fetch company:', error);
+        console.error("Failed to fetch company:", error);
       }
     }
   };
@@ -55,7 +76,11 @@ const CompanyManagement = () => {
       const response = await jobRoleApi.list();
       setJobRoles(response.data.jobRoles || []);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to fetch job roles');
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to fetch job roles"
+      );
     }
   };
 
@@ -68,17 +93,21 @@ const CompanyManagement = () => {
         name: companyName,
         employerName,
         arifpayMerchantKey,
-        paymentCycle: paymentCycle as 'daily' | 'weekly' | 'monthly'
+        paymentCycle: paymentCycle as "daily" | "weekly" | "monthly",
       });
       setCompany(response.data.company);
-      toast.success('Company created successfully!');
+      toast.success("Company created successfully!");
       setDialogOpen(false);
-      setCompanyName('');
-      setEmployerName('');
-      setArifpayMerchantKey('');
-      setPaymentCycle('monthly');
+      setCompanyName("");
+      setEmployerName("");
+      setArifpayMerchantKey("");
+      setPaymentCycle("monthly");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to create company');
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create company"
+      );
     } finally {
       setLoading(false);
     }
@@ -87,10 +116,10 @@ const CompanyManagement = () => {
   const handleCreateJobRole = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!company) {
-      toast.error('Please create a company first');
+      toast.error("Please create a company first");
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -102,15 +131,19 @@ const CompanyManagement = () => {
           roleBonus: Number(roleBonus),
         },
       });
-      toast.success('Job role created successfully!');
+      toast.success("Job role created successfully!");
       setJobRoleDialogOpen(false);
-      setRoleName('');
-      setBaseRate('');
-      setOvertimeRate('');
-      setRoleBonus('');
+      setRoleName("");
+      setBaseRate("");
+      setOvertimeRate("");
+      setRoleBonus("");
       fetchJobRoles();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to create job role');
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create job role"
+      );
     } finally {
       setLoading(false);
     }
@@ -125,27 +158,35 @@ const CompanyManagement = () => {
         name: companyName,
         employerName,
         arifpayMerchantKey,
-        paymentCycle: paymentCycle as 'daily' | 'weekly' | 'monthly'
+        paymentCycle: paymentCycle as "daily" | "weekly" | "monthly",
       });
-      toast.success('Company updated successfully!');
+      toast.success("Company updated successfully!");
       setEditCompanyDialogOpen(false);
       await fetchCompanyData();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to update company');
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to update company"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteJobRole = async (roleId: string) => {
-    if (!confirm('Are you sure you want to delete this job role?')) return;
-    
+    if (!confirm("Are you sure you want to delete this job role?")) return;
+
     try {
       await jobRoleApi.delete(roleId);
-      toast.success('Job role deleted successfully!');
+      toast.success("Job role deleted successfully!");
       fetchJobRoles();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to delete job role');
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to delete job role"
+      );
     }
   };
 
@@ -153,7 +194,8 @@ const CompanyManagement = () => {
     if (company) {
       setCompanyName(company.name);
       setEmployerName(company.employerName);
-      setArifpayMerchantKey(company.arifpayMerchantKey || '');
+      // Do not prefill merchant key for security reasons; leave blank so user can enter a new key if desired
+      setArifpayMerchantKey("");
       setPaymentCycle(company.paymentCycle);
       setEditCompanyDialogOpen(true);
     }
@@ -164,7 +206,11 @@ const CompanyManagement = () => {
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer')}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/employer")}
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
@@ -180,12 +226,15 @@ const CompanyManagement = () => {
               <CardTitle className="flex items-center justify-between">
                 <span>Company</span>
                 {company ? (
-                  <Dialog open={editCompanyDialogOpen} onOpenChange={(open) => {
-                    if (open) {
-                      openEditCompanyDialog();
-                    }
-                    setEditCompanyDialogOpen(open);
-                  }}>
+                  <Dialog
+                    open={editCompanyDialogOpen}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        openEditCompanyDialog();
+                      }
+                      setEditCompanyDialogOpen(open);
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button size="sm" variant="outline">
                         <Edit className="w-4 h-4 mr-2" />
@@ -202,7 +251,9 @@ const CompanyManagement = () => {
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div className="space-y-2">
-                            <Label htmlFor="editCompanyName">Company Name</Label>
+                            <Label htmlFor="editCompanyName">
+                              Company Name
+                            </Label>
                             <Input
                               id="editCompanyName"
                               placeholder="Acme Corp"
@@ -212,7 +263,9 @@ const CompanyManagement = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="editEmployerName">Employer Name</Label>
+                            <Label htmlFor="editEmployerName">
+                              Employer Name
+                            </Label>
                             <Input
                               id="editEmployerName"
                               placeholder="John Doe"
@@ -222,16 +275,23 @@ const CompanyManagement = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="editArifpayKey">Arifpay Merchant Key</Label>
+                            <Label htmlFor="editArifpayKey">
+                              Arifpay Merchant Key
+                            </Label>
                             <Input
                               id="editArifpayKey"
+                              type="password"
                               placeholder="Your Arifpay merchant key"
                               value={arifpayMerchantKey}
-                              onChange={(e) => setArifpayMerchantKey(e.target.value)}
+                              onChange={(e) =>
+                                setArifpayMerchantKey(e.target.value)
+                              }
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="editPaymentCycle">Payment Cycle</Label>
+                            <Label htmlFor="editPaymentCycle">
+                              Payment Cycle
+                            </Label>
                             <select
                               id="editPaymentCycle"
                               className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
@@ -246,7 +306,7 @@ const CompanyManagement = () => {
                         </div>
                         <DialogFooter>
                           <Button type="submit" disabled={loading}>
-                            {loading ? 'Updating...' : 'Update Company'}
+                            {loading ? "Updating..." : "Update Company"}
                           </Button>
                         </DialogFooter>
                       </form>
@@ -290,12 +350,17 @@ const CompanyManagement = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="arifpayKey">Arifpay Merchant Key</Label>
+                            <Label htmlFor="arifpayKey">
+                              Arifpay Merchant Key
+                            </Label>
                             <Input
                               id="arifpayKey"
+                              type="password"
                               placeholder="Your Arifpay merchant key"
                               value={arifpayMerchantKey}
-                              onChange={(e) => setArifpayMerchantKey(e.target.value)}
+                              onChange={(e) =>
+                                setArifpayMerchantKey(e.target.value)
+                              }
                             />
                           </div>
                           <div className="space-y-2">
@@ -314,7 +379,7 @@ const CompanyManagement = () => {
                         </div>
                         <DialogFooter>
                           <Button type="submit" disabled={loading}>
-                            {loading ? 'Creating...' : 'Create Company'}
+                            {loading ? "Creating..." : "Create Company"}
                           </Button>
                         </DialogFooter>
                       </form>
@@ -333,18 +398,33 @@ const CompanyManagement = () => {
                       <p className="font-medium">{company.name}</p>
                     </div>
                     <div className="space-y-1 text-sm text-muted-foreground">
-                      <p><strong>Employer:</strong> {company.employerName}</p>
-                      <p><strong>Payment Cycle:</strong> {company.paymentCycle}</p>
-                      <p><strong>Bonus Rate:</strong> {company.bonusRateMultiplier}x</p>
-                      <p><strong>Max Daily Hours:</strong> {company.maxDailyHours}</p>
+                      <p>
+                        <strong>Employer:</strong> {company.employerName}
+                      </p>
+                      <p>
+                        <strong>Payment Cycle:</strong> {company.paymentCycle}
+                      </p>
+                      <p>
+                        <strong>Bonus Rate:</strong>{" "}
+                        {company.bonusRateMultiplier}x
+                      </p>
+                      <p>
+                        <strong>Max Daily Hours:</strong>{" "}
+                        {company.maxDailyHours}
+                      </p>
                       {company.arifpayMerchantKey && (
-                        <p><strong>Arifpay Key:</strong> {company.arifpayMerchantKey.substring(0, 8)}...</p>
+                        <p>
+                          <strong>Arifpay Key:</strong>{" "}
+                          {company.arifpayMerchantKey.substring(0, 8)}...
+                        </p>
                       )}
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No company created yet</p>
+                <p className="text-sm text-muted-foreground">
+                  No company created yet
+                </p>
               )}
             </CardContent>
           </Card>
@@ -353,7 +433,10 @@ const CompanyManagement = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Job Roles</span>
-                <Dialog open={jobRoleDialogOpen} onOpenChange={setJobRoleDialogOpen}>
+                <Dialog
+                  open={jobRoleDialogOpen}
+                  onOpenChange={setJobRoleDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button size="sm" disabled={!company}>
                       <Plus className="w-4 h-4 mr-2" />
@@ -391,7 +474,9 @@ const CompanyManagement = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="overtimeRate">Overtime Rate (per hour)</Label>
+                          <Label htmlFor="overtimeRate">
+                            Overtime Rate (per hour)
+                          </Label>
                           <Input
                             id="overtimeRate"
                             type="number"
@@ -415,7 +500,7 @@ const CompanyManagement = () => {
                       </div>
                       <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                          {loading ? 'Creating...' : 'Create Role'}
+                          {loading ? "Creating..." : "Create Role"}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -426,9 +511,13 @@ const CompanyManagement = () => {
             </CardHeader>
             <CardContent>
               {!company ? (
-                <p className="text-sm text-muted-foreground">Create a company first to add job roles</p>
+                <p className="text-sm text-muted-foreground">
+                  Create a company first to add job roles
+                </p>
               ) : jobRoles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No job roles created yet</p>
+                <p className="text-sm text-muted-foreground">
+                  No job roles created yet
+                </p>
               ) : (
                 <Table>
                   <TableHeader>
@@ -443,7 +532,9 @@ const CompanyManagement = () => {
                   <TableBody>
                     {jobRoles.map((role) => (
                       <TableRow key={role._id}>
-                        <TableCell className="font-medium">{role.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {role.name}
+                        </TableCell>
                         <TableCell>ETB {role.defaultRates.base}</TableCell>
                         <TableCell>ETB {role.defaultRates.overtime}</TableCell>
                         <TableCell>ETB {role.defaultRates.roleBonus}</TableCell>

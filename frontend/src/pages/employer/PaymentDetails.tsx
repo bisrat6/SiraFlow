@@ -14,15 +14,14 @@ import {
   User,
   Calendar,
   CreditCard,
-  AlertCircle,
-  Building2
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentApi, companyApi } from '@/lib/api';
 import { format } from 'date-fns';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const PaymentDetails = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [payment, setPayment] = useState<any>(null);
   const [company, setCompany] = useState<any>(null);
@@ -132,48 +131,48 @@ const PaymentDetails = () => {
 
   if (!payment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 mx-auto animate-spin mb-4" />
-          <p>Loading payment details...</p>
+      <DashboardLayout title="Payment Details" subtitle="Loading..." role="employer">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <RefreshCw className="w-16 h-16 mx-auto animate-spin text-gray-300 mb-4" />
+            <p className="text-gray-600">Loading payment details...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer/payments')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Payments
-            </Button>
-            <h1 className="text-xl font-bold">Payment Details</h1>
-          </div>
-          <div className="flex gap-2">
-            {payment.status === 'pending' && (
-              <Button onClick={handleApprove} disabled={loading}>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Approve Payment
-              </Button>
-            )}
-            {payment.status === 'failed' && (
-              <Button variant="outline" onClick={handleRetry} disabled={loading}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Retry Payment
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+    <DashboardLayout 
+      title="Payment Details" 
+      subtitle="View detailed payment information"
+      role="employer"
+    >
+      {/* Actions */}
+      <div className="flex gap-3 mb-6">
+        <Button variant="ghost" onClick={() => navigate('/employer/payments')}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Payments
+        </Button>
+        {payment.status === 'pending' && (
+          <Button onClick={handleApprove} disabled={loading} className="bg-black hover:bg-gray-800 text-white">
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Approve Payment
+          </Button>
+        )}
+        {payment.status === 'failed' && (
+          <Button variant="outline" onClick={handleRetry} disabled={loading} className="border-black text-black hover:bg-gray-50">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry Payment
+          </Button>
+        )}
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
+      {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Payment Information */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
@@ -258,7 +257,7 @@ const PaymentDetails = () => {
             </Card>
 
             {/* Employee Information */}
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
@@ -292,7 +291,7 @@ const PaymentDetails = () => {
           <div className="space-y-6">
             {/* Company Information */}
             {company && (
-              <Card className="shadow-elegant">
+              <Card className="bg-white rounded-2xl border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Building2 className="w-5 h-5" />
@@ -319,7 +318,7 @@ const PaymentDetails = () => {
             )}
 
             {/* Payment Timeline */}
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
@@ -366,7 +365,7 @@ const PaymentDetails = () => {
             </Card>
 
             {/* Actions */}
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
@@ -404,10 +403,9 @@ const PaymentDetails = () => {
                 </Button>
               </CardContent>
             </Card>
-          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

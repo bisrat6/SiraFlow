@@ -28,9 +28,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building2, Plus, Edit, Trash2 } from "lucide-react";
+import { Building2, Plus, Edit, Trash2, Briefcase, CreditCard, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { companyApi, jobRoleApi } from "@/lib/api";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CompanyManagement = () => {
   const navigate = useNavigate();
@@ -202,247 +204,234 @@ const CompanyManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/employer")}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <h1 className="text-xl font-bold">Company Management</h1>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="shadow-elegant gradient-card">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Company</span>
-                {company ? (
-                  <Dialog
-                    open={editCompanyDialogOpen}
-                    onOpenChange={(open) => {
-                      if (open) {
-                        openEditCompanyDialog();
-                      }
-                      setEditCompanyDialogOpen(open);
-                    }}
-                  >
-                    <DialogTrigger asChild>
-                      <Button size="sm" variant="outline">
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <form onSubmit={handleUpdateCompany}>
-                        <DialogHeader>
-                          <DialogTitle>Edit Company</DialogTitle>
-                          <DialogDescription>
-                            Update your company profile
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="editCompanyName">
-                              Company Name
-                            </Label>
-                            <Input
-                              id="editCompanyName"
-                              placeholder="Acme Corp"
-                              value={companyName}
-                              onChange={(e) => setCompanyName(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="editEmployerName">
-                              Employer Name
-                            </Label>
-                            <Input
-                              id="editEmployerName"
-                              placeholder="John Doe"
-                              value={employerName}
-                              onChange={(e) => setEmployerName(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="editArifpayKey">
-                              Arifpay Merchant Key
-                            </Label>
-                            <Input
-                              id="editArifpayKey"
-                              type="password"
-                              placeholder="Your Arifpay merchant key"
-                              value={arifpayMerchantKey}
-                              onChange={(e) =>
-                                setArifpayMerchantKey(e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="editPaymentCycle">
-                              Payment Cycle
-                            </Label>
-                            <select
-                              id="editPaymentCycle"
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
-                              value={paymentCycle}
-                              onChange={(e) => setPaymentCycle(e.target.value)}
-                            >
-                              <option value="daily">Daily</option>
-                              <option value="weekly">Weekly</option>
-                              <option value="monthly">Monthly</option>
-                            </select>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit" disabled={loading}>
-                            {loading ? "Updating..." : "Update Company"}
-                          </Button>
-                        </DialogFooter>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                ) : (
-                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <form onSubmit={handleCreateCompany}>
-                        <DialogHeader>
-                          <DialogTitle>Create Company</DialogTitle>
-                          <DialogDescription>
-                            Set up your company profile
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="companyName">Company Name</Label>
-                            <Input
-                              id="companyName"
-                              placeholder="Acme Corp"
-                              value={companyName}
-                              onChange={(e) => setCompanyName(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="employerName">Employer Name</Label>
-                            <Input
-                              id="employerName"
-                              placeholder="John Doe"
-                              value={employerName}
-                              onChange={(e) => setEmployerName(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="arifpayKey">
-                              Arifpay Merchant Key
-                            </Label>
-                            <Input
-                              id="arifpayKey"
-                              type="password"
-                              placeholder="Your Arifpay merchant key"
-                              value={arifpayMerchantKey}
-                              onChange={(e) =>
-                                setArifpayMerchantKey(e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="paymentCycle">Payment Cycle</Label>
-                            <select
-                              id="paymentCycle"
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
-                              value={paymentCycle}
-                              onChange={(e) => setPaymentCycle(e.target.value)}
-                            >
-                              <option value="daily">Daily</option>
-                              <option value="weekly">Weekly</option>
-                              <option value="monthly">Monthly</option>
-                            </select>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit" disabled={loading}>
-                            {loading ? "Creating..." : "Create Company"}
-                          </Button>
-                        </DialogFooter>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </CardTitle>
-              <CardDescription>Manage your company profile</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {company ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Building2 className="w-5 h-5 text-muted-foreground" />
-                      <p className="font-medium">{company.name}</p>
-                    </div>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <p>
-                        <strong>Employer:</strong> {company.employerName}
-                      </p>
-                      <p>
-                        <strong>Payment Cycle:</strong> {company.paymentCycle}
-                      </p>
-                      <p>
-                        <strong>Bonus Rate:</strong>{" "}
-                        {company.bonusRateMultiplier}x
-                      </p>
-                      <p>
-                        <strong>Max Daily Hours:</strong>{" "}
-                        {company.maxDailyHours}
-                      </p>
-                      {company.arifpayMerchantKey && (
-                        <p>
-                          <strong>Arifpay Key:</strong>{" "}
-                          {company.arifpayMerchantKey.substring(0, 8)}...
-                        </p>
-                      )}
-                    </div>
+    <DashboardLayout 
+      title="Company Settings" 
+      subtitle="Manage your company profile and job roles"
+      role="employer"
+    >
+      {/* Company Info Card */}
+      {company && (
+        <div className="bg-gradient-to-br from-gray-900 to-black text-white rounded-2xl p-8 mb-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-4">{company.name}</h2>
+              <div className="grid grid-cols-2 gap-x-12 gap-y-3">
+                <div className="flex items-center space-x-3">
+                  <Briefcase className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-400">Employer</p>
+                    <p className="font-medium">{company.employerName}</p>
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No company created yet
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-elegant gradient-card">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Job Roles</span>
-                <Dialog
-                  open={jobRoleDialogOpen}
-                  onOpenChange={setJobRoleDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button size="sm" disabled={!company}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create
+                <div className="flex items-center space-x-3">
+                  <CalendarIcon className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-400">Payment Cycle</p>
+                    <p className="font-medium capitalize">{company.paymentCycle}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CreditCard className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-400">Bonus Multiplier</p>
+                    <p className="font-medium">{company.bonusRateMultiplier}x</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Building2 className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-400">Max Daily Hours</p>
+                    <p className="font-medium">{company.maxDailyHours}h</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Dialog
+              open={editCompanyDialogOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  openEditCompanyDialog();
+                }
+                setEditCompanyDialogOpen(open);
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-white hover:bg-gray-100 text-black">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Company
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <form onSubmit={handleUpdateCompany}>
+                  <DialogHeader>
+                    <DialogTitle>Edit Company</DialogTitle>
+                    <DialogDescription>
+                      Update your company profile and settings
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="editCompanyName">Company Name</Label>
+                      <Input
+                        id="editCompanyName"
+                        placeholder="Acme Corp"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="editEmployerName">Employer Name</Label>
+                      <Input
+                        id="editEmployerName"
+                        placeholder="John Doe"
+                        value={employerName}
+                        onChange={(e) => setEmployerName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="editArifpayKey">Arifpay Merchant Key</Label>
+                      <Input
+                        id="editArifpayKey"
+                        type="password"
+                        placeholder="Your Arifpay merchant key"
+                        value={arifpayMerchantKey}
+                        onChange={(e) => setArifpayMerchantKey(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="editPaymentCycle">Payment Cycle</Label>
+                      <Select value={paymentCycle} onValueChange={setPaymentCycle}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" disabled={loading} className="bg-black hover:bg-gray-800 text-white">
+                      {loading ? "Updating..." : "Update Company"}
                     </Button>
-                  </DialogTrigger>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      )}
+
+      {/* Create Company Prompt */}
+      {!company && (
+        <Card className="bg-white rounded-2xl border border-gray-200 mb-6">
+          <CardHeader className="pb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Get Started</CardTitle>
+                <CardDescription>Create your company profile to begin</CardDescription>
+              </div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-black hover:bg-gray-800 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Company
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <form onSubmit={handleCreateCompany}>
+                    <DialogHeader>
+                      <DialogTitle>Create Company</DialogTitle>
+                      <DialogDescription>
+                        Set up your company profile
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="companyName">Company Name</Label>
+                        <Input
+                          id="companyName"
+                          placeholder="Acme Corp"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="employerName">Employer Name</Label>
+                        <Input
+                          id="employerName"
+                          placeholder="John Doe"
+                          value={employerName}
+                          onChange={(e) => setEmployerName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="arifpayKey">Arifpay Merchant Key</Label>
+                        <Input
+                          id="arifpayKey"
+                          type="password"
+                          placeholder="Your Arifpay merchant key"
+                          value={arifpayMerchantKey}
+                          onChange={(e) => setArifpayMerchantKey(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="paymentCycle">Payment Cycle</Label>
+                        <Select value={paymentCycle} onValueChange={setPaymentCycle}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" disabled={loading} className="bg-black hover:bg-gray-800 text-white">
+                        {loading ? "Creating..." : "Create Company"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12">
+              <Building2 className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-600">Create your company profile to get started</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Job Roles Card */}
+      <Card className="bg-white rounded-2xl border border-gray-200">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Job Roles & Payment Rates</CardTitle>
+              <CardDescription>Define roles and payment structures for your workforce</CardDescription>
+            </div>
+            <Dialog
+              open={jobRoleDialogOpen}
+              onOpenChange={setJobRoleDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button disabled={!company} className="bg-black hover:bg-gray-800 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Job Role
+                </Button>
+              </DialogTrigger>
                   <DialogContent>
                     <form onSubmit={handleCreateJobRole}>
                       <DialogHeader>
@@ -498,18 +487,17 @@ const CompanyManagement = () => {
                           />
                         </div>
                       </div>
-                      <DialogFooter>
-                        <Button type="submit" disabled={loading}>
+                        <DialogFooter>
+                        <Button type="submit" disabled={loading} className="bg-black hover:bg-gray-800 text-white">
                           {loading ? "Creating..." : "Create Role"}
                         </Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
                 </Dialog>
-              </CardTitle>
-              <CardDescription>Define roles and payment rates</CardDescription>
+              </div>
             </CardHeader>
-            <CardContent>
+        <CardContent>
               {!company ? (
                 <p className="text-sm text-muted-foreground">
                   Create a company first to add job roles
@@ -553,10 +541,8 @@ const CompanyManagement = () => {
                 </Table>
               )}
             </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
+      </Card>
+    </DashboardLayout>
   );
 };
 

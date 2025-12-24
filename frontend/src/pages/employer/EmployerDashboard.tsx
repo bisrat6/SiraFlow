@@ -1,120 +1,127 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, Clock, DollarSign, BarChart3, LogOut, CreditCard, PieChart, TrendingUp, User } from 'lucide-react';
-import { removeToken, getCurrentUser } from '@/lib/auth';
-import { toast } from 'sonner';
+import { Users, Clock, DollarSign, BarChart3 } from 'lucide-react';
+import { getCurrentUser } from '@/lib/auth';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const EmployerDashboard = () => {
   const navigate = useNavigate();
   const user = getCurrentUser();
-
-  const handleLogout = () => {
-    removeToken();
-    toast.success('Logged out successfully');
-    navigate('/auth/login');
-  };
-
-  const dashboardCards = [
-    {
-      title: 'Company',
-      description: 'Manage your company profile',
-      icon: Building2,
-      link: '/employer/company',
-      color: 'text-blue-600',
-    },
-    {
-      title: 'Employees',
-      description: 'View and manage employees',
-      icon: Users,
-      link: '/employer/employees',
-      color: 'text-green-600',
-    },
-    {
-      title: 'Time Logs',
-      description: 'Review pending approvals',
-      icon: Clock,
-      link: '/employer/timelogs',
-      color: 'text-purple-600',
-    },
-    {
-      title: 'Payments',
-      description: 'Process employee payments',
-      icon: DollarSign,
-      link: '/employer/payments',
-      color: 'text-amber-600',
-    },
-    {
-      title: 'Payroll Summary',
-      description: 'View payment analytics',
-      icon: PieChart,
-      link: '/employer/payroll-summary',
-      color: 'text-cyan-600',
-    },
-    {
-      title: 'Analytics',
-      description: 'View attendance insights',
-      icon: BarChart3,
-      link: '/employer/analytics',
-      color: 'text-rose-600',
-    },
-  ];
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    activeTimeLogs: 0,
+    pendingPayments: 0,
+    totalPaid: 0
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-primary-foreground" />
+    <DashboardLayout 
+      title="Dashboard" 
+      subtitle={`Welcome back, ${user?.name?.split(' ')[0]} 👋 Here's what's happening with your workforce today`}
+      role="employer"
+    >
+      <div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-black mb-1">{stats.totalEmployees}</div>
+              <div className="text-sm text-gray-500">Total Employees</div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">SiraFlow</h1>
-              <p className="text-xs text-muted-foreground">Employer Portal</p>
+
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-black mb-1">{stats.activeTimeLogs}</div>
+              <div className="text-sm text-gray-500">Active Time Logs</div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-black mb-1">{stats.pendingPayments}</div>
+              <div className="text-sm text-gray-500">Pending Payments</div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-black mb-1">{stats.totalPaid.toLocaleString()} ETB</div>
+              <div className="text-sm text-gray-500">Total Paid This Month</div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{user?.name}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+
+          {/* Quick Actions */}
+          <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 text-white mb-8">
+            <h3 className="text-2xl font-bold mb-6">Quick Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/employer/employees">
+                <button className="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-xl p-4 text-left transition-all">
+                  <Users className="w-6 h-6 mb-3" />
+                  <div className="font-semibold mb-1">Manage Employees</div>
+                  <div className="text-sm text-gray-300">Add or update employee information</div>
+                </button>
+              </Link>
+
+              <Link to="/employer/timelogs">
+                <button className="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-xl p-4 text-left transition-all">
+                  <Clock className="w-6 h-6 mb-3" />
+                  <div className="font-semibold mb-1">Review Time Logs</div>
+                  <div className="text-sm text-gray-300">Approve pending time entries</div>
+                </button>
+              </Link>
+
+              <Link to="/employer/payments">
+                <button className="w-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-xl p-4 text-left transition-all">
+                  <DollarSign className="w-6 h-6 mb-3" />
+                  <div className="font-semibold mb-1">Process Payroll</div>
+                  <div className="text-sm text-gray-300">Initiate employee payments</div>
+                </button>
+              </Link>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/me')}>
-              <User className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
           </div>
-        </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}</h2>
-          <p className="text-muted-foreground">Manage your workforce and payments from one place</p>
-        </div>
+          {/* Additional Info Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200">
+              <h3 className="text-lg font-bold text-black mb-4">Recent Activity</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-600">All systems operational</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-gray-600">Last sync: Just now</span>
+                </div>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dashboardCards.map((card) => (
-            <Link key={card.link} to={card.link}>
-              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 gradient-card border-border/50">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`w-12 h-12 rounded-lg bg-muted flex items-center justify-center ${card.color}`}>
-                      <card.icon className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <CardTitle>{card.title}</CardTitle>
-                  <CardDescription>{card.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
+            <div className="bg-white rounded-2xl p-6 border border-gray-200">
+              <h3 className="text-lg font-bold text-black mb-4">Support</h3>
+              <p className="text-sm text-gray-600 mb-4">Need help managing your workforce?</p>
+              <Button variant="outline" className="w-full border-black text-black hover:bg-gray-50">
+                Contact Support
+              </Button>
+            </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

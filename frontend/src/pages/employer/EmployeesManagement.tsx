@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Users, Edit, Trash2 } from 'lucide-react';
+import { Plus, Users, Edit, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { employeeApi, jobRoleApi } from '@/lib/api';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const EmployeesManagement = () => {
   const navigate = useNavigate();
@@ -66,13 +67,30 @@ const EmployeesManagement = () => {
     setErrors({});
 
     try {
-      await employeeApi.add({
+      const response = await employeeApi.add({
         name,
         email,
         jobRoleId,
         telebirrMsisdn,
       });
-      toast.success('Employee added successfully!');
+      
+      // Check if a temporary password was generated
+      if (response.data.temporaryPassword) {
+        toast.success(
+          `Employee added! Temporary password: ${response.data.temporaryPassword}`,
+          { duration: 10000 }
+        );
+        // Also show an alert with the password
+        alert(
+          `Employee Added Successfully!\n\n` +
+          `Email: ${email}\n` +
+          `Temporary Password: ${response.data.temporaryPassword}\n\n` +
+          `Please share this password with the employee. They can change it after logging in.`
+        );
+      } else {
+        toast.success('Employee added successfully!');
+      }
+      
       setDialogOpen(false);
       resetForm();
       fetchEmployees();
@@ -162,23 +180,23 @@ const EmployeesManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+    <DashboardLayout 
+      title="Employees" 
+      subtitle="Manage your workforce and employee information"
+      role="employer"
+    >
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-2">
+          <Users className="w-6 h-6" />
+          <span className="text-lg font-semibold">{employees.length} Total Employees</span>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-black hover:bg-gray-800 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Employee
             </Button>
-            <h1 className="text-xl font-bold">Employees</h1>
-          </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Employee
-              </Button>
-            </DialogTrigger>
+          </DialogTrigger>
             <DialogContent>
               <form onSubmit={handleAddEmployee}>
                 <DialogHeader>
@@ -343,11 +361,9 @@ const EmployeesManagement = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
-        <Card className="shadow-elegant">
+      <Card className="bg-white rounded-2xl border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
@@ -390,7 +406,16 @@ const EmployeesManagement = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => navigate(`/employer/employees/${employee._id}`)}
+                              title="View Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => handleEditEmployee(employee)}
+                              title="Edit"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -398,6 +423,7 @@ const EmployeesManagement = () => {
                               size="sm"
                               variant="destructive"
                               onClick={() => handleDeleteEmployee(employee)}
+                              title="Delete"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -411,8 +437,7 @@ const EmployeesManagement = () => {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

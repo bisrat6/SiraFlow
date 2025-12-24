@@ -48,6 +48,46 @@ const companySchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  verificationStatus: {
+    type: String,
+    enum: ['pending', 'verified', 'rejected', 'suspended'],
+    default: 'pending'
+  },
+  verifiedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  verifiedAt: {
+    type: Date
+  },
+  rejectionReason: {
+    type: String
+  },
+  subscriptionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Subscription'
+  },
+  onboardingCompleted: {
+    type: Boolean,
+    default: false
+  },
+  tin: { // Tax Identification Number
+    type: String,
+    trim: true
+  },
+  businessLicense: {
+    type: String,
+    trim: true
+  },
+  industry: {
+    type: String,
+    trim: true
+  },
+  size: {
+    type: String,
+    enum: ['1-10', '11-50', '51-200', '201-500', '500+'],
+    default: '1-10'
   }
 }, {
   timestamps: true

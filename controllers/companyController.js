@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Company = require("../models/Company");
+const { createSubscription } = require("./subscriptionController");
 
 // Create company
 const createCompany = async (req, res) => {
@@ -54,8 +55,17 @@ const createCompany = async (req, res) => {
 
     await company.save();
 
+    // Create trial subscription for the company
+    try {
+      const subscription = await createSubscription(company._id, 'free');
+      console.log(`[Company] Created trial subscription for company ${company._id}`);
+    } catch (subError) {
+      console.error('[Company] Error creating subscription:', subError);
+      // Don't fail company creation if subscription fails
+    }
+
     res.status(201).json({
-      message: "Company created successfully",
+      message: "Company created successfully with 14-day free trial",
       company: {
         id: company._id,
         name: company.name,

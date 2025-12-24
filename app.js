@@ -23,6 +23,9 @@ const timeLogRoutes = require("./routes/timeLogRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const jobRoleRoutes = require("./routes/jobRoleRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const superAdminRoutes = require("./routes/superAdminRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 
@@ -72,12 +75,15 @@ app.use("/api/time-logs", timeLogRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/jobroles", jobRoleRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/super-admin", superAdminRoutes);
+app.use("/api/contacts", contactRoutes);
 
 // API documentation endpoint
 app.get("/api", (req, res) => {
   res.json({
     message: "SiraFlow Backend API",
-    version: "1.0.0",
+    version: "1.0.1",
     endpoints: {
       auth: "/api/auth",
       company: "/api/company",
@@ -86,6 +92,8 @@ app.get("/api", (req, res) => {
       payments: "/api/payments",
       jobRoles: "/api/jobroles",
       analytics: "/api/analytics",
+      subscriptions: "/api/subscriptions",
+      superAdmin: "/api/super-admin",
     },
     documentation: {
       signup: "POST /api/auth/signup",

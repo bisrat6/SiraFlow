@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  ArrowLeft, 
   DollarSign, 
   Download, 
   TrendingUp,
   TrendingDown,
   Users,
   Clock,
-  Building2,
   Calendar,
   BarChart3,
   PieChart,
@@ -22,9 +19,9 @@ import {
 import { toast } from 'sonner';
 import { paymentApi, companyApi, employeeApi } from '@/lib/api';
 import { format, subDays, subWeeks, subMonths, startOfDay, endOfDay } from 'date-fns';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const PayrollSummary = () => {
-  const navigate = useNavigate();
   const [summary, setSummary] = useState<any>(null);
   const [company, setCompany] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -216,61 +213,153 @@ const PayrollSummary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <h1 className="text-xl font-bold">Payroll Summary</h1>
+    <DashboardLayout 
+      title="Payroll Summary" 
+      subtitle="View comprehensive payroll reports and analytics"
+      role="employer"
+    >
+      {/* Actions Bar */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-3">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-48">
+              <Calendar className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">Last 7 Days</SelectItem>
+              <SelectItem value="month">Last 30 Days</SelectItem>
+              <SelectItem value="quarter">Last 3 Months</SelectItem>
+              <SelectItem value="year">Last 12 Months</SelectItem>
+              <SelectItem value="custom">Custom Range</SelectItem>
+            </SelectContent>
+          </Select>
+          {dateRange === 'custom' && (
+            <div className="flex items-center space-x-2">
+              <Input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className="w-40"
+              />
+              <span>to</span>
+              <Input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className="w-40"
+              />
+            </div>
+          )}
+        </div>
+        <Button variant="outline" onClick={handleExport} className="border-black text-black hover:bg-gray-50">
+          <Download className="w-4 h-4 mr-2" />
+          Export Report
+        </Button>
+      </div>
+
+      {/* Summary for period */}
+      {company && summary && (
+        <div className="bg-gradient-to-br from-gray-900 to-black text-white rounded-2xl p-8 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-1">{company.name}</h2>
+              <p className="text-gray-300">Payroll Summary for {getDateRangeLabel()}</p>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{summary.totalEmployeesPaid || 0}</p>
+                  <p className="text-sm text-gray-300">Employees Paid</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{summary.totalAmount?.toLocaleString() || 0} ETB</p>
+                  <p className="text-sm text-gray-300">Total Paid</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{summary.totalPayments || 0}</p>
+                  <p className="text-sm text-gray-300">Payments</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{summary.avgPayment?.toLocaleString() || 0} ETB</p>
+                  <p className="text-sm text-gray-300">Avg Payment</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
+      )}
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Company Info */}
-        {company && (
-          <Card className="shadow-elegant gradient-card mb-6">
+      {/* Stats Grid */}
+      {summary && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <Card className="bg-white rounded-2xl border border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="w-5 h-5" />
-                {company.name}
-              </CardTitle>
-              <CardDescription>Payroll Summary for {getDateRangeLabel()}</CardDescription>
+              <CardTitle>Pending Payments</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment Cycle</p>
-                  <p className="font-semibold capitalize">{company.paymentCycle}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Bonus Rate</p>
-                  <p className="font-semibold">{company.bonusRateMultiplier}x</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Max Daily Hours</p>
-                  <p className="font-semibold">{company.maxDailyHours}h</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Employees</p>
-                  <p className="font-semibold">{employees.length}</p>
-                </div>
+              <div className="text-center py-6">
+                <p className="text-4xl font-bold text-black mb-2">{summary.pendingPayments || 0}</p>
+                <p className="text-sm text-gray-500">Awaiting approval</p>
               </div>
             </CardContent>
           </Card>
-        )}
+
+          <Card className="bg-white rounded-2xl border border-gray-200">
+            <CardHeader>
+              <CardTitle>Completed Payments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-6">
+                <p className="text-4xl font-bold text-black mb-2">{summary.completedPayments || 0}</p>
+                <p className="text-sm text-gray-500">Successfully processed</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white rounded-2xl border border-gray-200">
+            <CardHeader>
+              <CardTitle>Failed Payments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-6">
+                <p className="text-4xl font-bold text-black mb-2">{summary.failedPayments || 0}</p>
+                <p className="text-sm text-gray-500">Need attention</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
         {/* Date Range Selector */}
-        <Card className="shadow-elegant mb-6">
+        <Card className="bg-white rounded-2xl border border-gray-200 mb-6">
           <CardHeader>
             <CardTitle>Date Range</CardTitle>
           </CardHeader>
@@ -322,7 +411,7 @@ const PayrollSummary = () => {
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -340,7 +429,7 @@ const PayrollSummary = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -358,7 +447,7 @@ const PayrollSummary = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -374,7 +463,7 @@ const PayrollSummary = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -395,7 +484,7 @@ const PayrollSummary = () => {
         {/* Detailed Statistics */}
         {summary && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <PieChart className="w-5 h-5" />
@@ -436,7 +525,7 @@ const PayrollSummary = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />
@@ -472,7 +561,7 @@ const PayrollSummary = () => {
         )}
 
         {/* Recent Activity */}
-        <Card className="shadow-elegant mt-6">
+        <Card className="bg-white rounded-2xl border border-gray-200 mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5" />
@@ -509,8 +598,7 @@ const PayrollSummary = () => {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

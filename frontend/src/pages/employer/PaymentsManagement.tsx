@@ -10,25 +10,24 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  ArrowLeft, 
   DollarSign, 
   CheckCircle2, 
   XCircle, 
   RefreshCw, 
   Download, 
   Filter,
-  Building2,
   Users,
   Clock,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentApi, employeeApi, companyApi } from '@/lib/api';
 import { format } from 'date-fns';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const PaymentsManagement = () => {
-  const navigate = useNavigate();
   const [payments, setPayments] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [company, setCompany] = useState<any>(null);
@@ -319,32 +318,28 @@ const PaymentsManagement = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+    <DashboardLayout 
+      title="Payments Management" 
+      subtitle="Process payroll and manage employee payments"
+      role="employer"
+    >
+      {/* Quick Actions */}
+      <div className="flex gap-3 mb-6">
+        <Button onClick={handleProcessPayroll} disabled={loading} className="bg-black hover:bg-gray-800 text-white">
+          <Zap className="w-4 h-4 mr-2" />
+          Process Payroll
+        </Button>
+        <Button variant="outline" onClick={handleRetryFailed} disabled={loading} className="border-black text-black hover:bg-gray-50">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry Failed
+        </Button>
+        <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="border-black text-black hover:bg-gray-50">
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Bulk Approve
             </Button>
-            <h1 className="text-xl font-bold">Payment Management</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleProcessPayroll} disabled={loading}>
-              <DollarSign className="w-4 h-4 mr-2" />
-              Process Payroll
-            </Button>
-            <Button variant="outline" onClick={handleRetryFailed} disabled={loading}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry Failed
-            </Button>
-            <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Bulk Approve
-                </Button>
-              </DialogTrigger>
+          </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Bulk Approve Payments</DialogTitle>
@@ -373,49 +368,18 @@ const PaymentsManagement = () => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleBulkApprove} disabled={loading}>
+                  <Button onClick={handleBulkApprove} disabled={loading} className="bg-black hover:bg-gray-800 text-white">
                     {loading ? 'Approving...' : 'Approve All'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </div>
-        </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Company Info */}
-        {company && (
-          <Card className="shadow-elegant gradient-card mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="w-5 h-5" />
-                Company Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Company Name</p>
-                  <p className="font-semibold">{company.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment Cycle</p>
-                  <p className="font-semibold capitalize">{company.paymentCycle}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Bonus Rate</p>
-                  <p className="font-semibold">{company.bonusRateMultiplier}x</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Summary Cards */}
-        {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <Card className="shadow-elegant gradient-card">
+      {/* Summary Cards */}
+      {summary && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-600" />
@@ -426,7 +390,7 @@ const PaymentsManagement = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-blue-600" />
@@ -437,7 +401,7 @@ const PaymentsManagement = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-purple-600" />
@@ -448,7 +412,7 @@ const PaymentsManagement = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600" />
@@ -471,7 +435,7 @@ const PaymentsManagement = () => {
           </TabsList>
 
           <TabsContent value="payments">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -599,7 +563,7 @@ const PaymentsManagement = () => {
           </TabsContent>
 
           <TabsContent value="pending">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle>Pending Payments</CardTitle>
                 <CardDescription>Payments awaiting approval</CardDescription>
@@ -652,7 +616,7 @@ const PaymentsManagement = () => {
           </TabsContent>
 
           <TabsContent value="completed">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle>Completed Payments</CardTitle>
                 <CardDescription>Successfully processed payments</CardDescription>
@@ -702,7 +666,7 @@ const PaymentsManagement = () => {
           </TabsContent>
 
           <TabsContent value="failed">
-            <Card className="shadow-elegant">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle>Failed Payments</CardTitle>
                 <CardDescription>Payments that failed to process</CardDescription>
@@ -759,8 +723,7 @@ const PaymentsManagement = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

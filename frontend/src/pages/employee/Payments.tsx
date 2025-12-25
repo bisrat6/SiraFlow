@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, DollarSign, Clock, Calendar, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { DollarSign, Clock, Calendar, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { paymentApi } from '@/lib/api';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const Payments = () => {
-  const navigate = useNavigate();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -88,23 +86,14 @@ const Payments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employee')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <h1 className="text-xl font-bold">My Payments</h1>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card className="shadow-elegant gradient-card">
+    <DashboardLayout 
+      title="My Payments" 
+      subtitle="View your payment history and earnings"
+      role="employee"
+    >
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <Card className="bg-white rounded-2xl border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-green-600" />
@@ -116,31 +105,31 @@ const Payments = () => {
             </CardContent>
           </Card>
           
-          <Card className="shadow-elegant gradient-card">
+          <Card className="bg-white rounded-2xl border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold">{summary?.completedPayments || 0}</p>
+                  <p className="text-sm text-gray-500">Completed</p>
+                  <p className="text-2xl font-bold text-black">{summary?.completedPayments || 0}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-elegant gradient-card">
+          <Card className="bg-white rounded-2xl border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-amber-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{summary?.pendingPayments || 0}</p>
+                  <p className="text-sm text-gray-500">Pending</p>
+                  <p className="text-2xl font-bold text-black">{summary?.pendingPayments || 0}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-elegant gradient-card">
+          <Card className="bg-white rounded-2xl border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-blue-600" />
@@ -153,7 +142,7 @@ const Payments = () => {
           </Card>
         </div>
 
-        <Card className="shadow-elegant">
+      <Card className="bg-white rounded-2xl border border-gray-200">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -252,8 +241,7 @@ const Payments = () => {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

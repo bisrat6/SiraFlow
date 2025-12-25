@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
-  ArrowLeft, 
   User, 
   Mail, 
   Calendar, 
@@ -23,9 +22,12 @@ import {
 import { toast } from 'sonner';
 import { authApi, employeeApi, companyApi } from '@/lib/api';
 import { format } from 'date-fns';
+import DashboardLayout from '@/components/DashboardLayout';
+import { getCurrentUser } from '@/lib/auth';
 
 const Me = () => {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
   const [user, setUser] = useState<any>(null);
   const [employee, setEmployee] = useState<any>(null);
   const [company, setCompany] = useState<any>(null);
@@ -166,169 +168,151 @@ const Me = () => {
 
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
+      <DashboardLayout title="Profile" subtitle="Loading..." role={currentUser?.role as any}>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground">Failed to load profile. Please try again.</p>
-          <Button className="mt-4" onClick={fetchProfile}>Retry</Button>
+      <DashboardLayout title="Profile" subtitle="Error loading profile" role={currentUser?.role as any}>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Failed to load profile. Please try again.</p>
+            <Button onClick={fetchProfile} className="bg-black hover:bg-gray-800 text-white">Retry</Button>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+    <DashboardLayout 
+      title="My Profile" 
+      subtitle="Manage your account settings and preferences"
+      role={user?.role as any}
+    >
+      {/* Action Buttons */}
+      <div className="flex gap-3 mb-6">
+        {!editing && user?.role === 'employer' && (
+          <Button variant="outline" onClick={() => setEditing(true)} className="border-black text-black hover:bg-gray-50">
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
+        <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="border-black text-black hover:bg-gray-50">
+              <Key className="w-4 h-4 mr-2" />
+              Change Password
             </Button>
-            <h1 className="text-xl font-bold">My Profile</h1>
-          </div>
-          <div className="flex gap-2">
-            {!editing && user?.role === 'employer' && (
-              <Button variant="outline" onClick={() => setEditing(true)}>
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-            )}
-            <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Key className="w-4 h-4 mr-2" />
-                  Change Password
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <form onSubmit={handleChangePassword}>
-                  <DialogHeader>
-                    <DialogTitle>Change Password</DialogTitle>
-                    <DialogDescription>
-                      Enter your current password and new password
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit" disabled={loading}>
-                      {loading ? 'Changing...' : 'Change Password'}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Card */}
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Profile Information
-              </CardTitle>
-              <CardDescription>Your personal details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  {user?.email?.charAt(0).toUpperCase()}
+          </DialogTrigger>
+          <DialogContent>
+            <form onSubmit={handleChangePassword}>
+              <DialogHeader>
+                <DialogTitle>Change Password</DialogTitle>
+                <DialogDescription>
+                  Enter your current password and new password
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                    className="border-gray-300 focus:border-black"
+                  />
                 </div>
-                <div>
-                  <h3 className="font-semibold">{editData.name || 'N/A'}</h3>
-                  <Badge className={getRoleColor()}>{getRoleDisplayName()}</Badge>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="border-gray-300 focus:border-black"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="border-gray-300 focus:border-black"
+                  />
                 </div>
               </div>
-              
-              <Separator />
-              
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
+              <DialogFooter>
+                <Button type="submit" disabled={loading} className="bg-black hover:bg-gray-800 text-white">
+                  {loading ? 'Changing...' : 'Change Password'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Profile Header Card */}
+      <div className="bg-gradient-to-br from-gray-900 to-black text-white rounded-2xl p-8 mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-6">
+            <div className="w-24 h-24 bg-white/10 border-4 border-white/20 rounded-2xl flex items-center justify-center text-white font-bold text-4xl">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-2">{editData.name || user?.email}</h2>
+              <Badge className="bg-white/20 text-white border-0 mb-4">
+                {getRoleDisplayName()}
+              </Badge>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3 mt-4">
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <Mail className="w-4 h-4" />
                   <span className="text-sm">{editData.email}</span>
                 </div>
-                
-                {user?.role === 'employee' && (
-                  <>
-                    {editData.telebirrMsisdn && (
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm">{editData.telebirrMsisdn}</span>
-                      </div>
-                    )}
-                    {editData.phoneNumber && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm">{editData.phoneNumber}</span>
-                      </div>
-                    )}
-                    {editData.address && (
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm">{editData.address}</span>
-                      </div>
-                    )}
-                  </>
-                )}
-                
                 {user?.createdAt && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex items-center space-x-2 text-gray-300">
+                    <Calendar className="w-4 h-4" />
                     <span className="text-sm">Joined {format(new Date(user.createdAt), 'MMM dd, yyyy')}</span>
                   </div>
                 )}
+                {user?.role === 'employee' && editData.telebirrMsisdn && (
+                  <div className="flex items-center space-x-2 text-gray-300">
+                    <DollarSign className="w-4 h-4" />
+                    <span className="text-sm">{editData.telebirrMsisdn}</span>
+                  </div>
+                )}
+                {user?.role === 'employee' && editData.phoneNumber && (
+                  <div className="flex items-center space-x-2 text-gray-300">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm">{editData.phoneNumber}</span>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          {/* Company/Employment Info */}
-          {(company || employee) && (
-            <Card className="shadow-elegant">
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* Company/Employment Info */}
+        {(company || employee) && (
+          <Card className="bg-white rounded-2xl border border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
@@ -378,9 +362,49 @@ const Me = () => {
             </Card>
           )}
 
-          {/* Edit Form - Only for Employers */}
-          {editing && user?.role === 'employer' && (
-            <Card className="shadow-elegant lg:col-span-3">
+        {/* Account Security */}
+        <Card className="bg-white rounded-2xl border border-gray-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5" />
+              Account Security
+            </CardTitle>
+            <CardDescription>Manage your account security settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="text-sm text-gray-500">Password</Label>
+              <p className="font-semibold mb-2">••••••••••</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setChangePasswordOpen(true)}
+                className="border-black text-black hover:bg-gray-50"
+              >
+                <Key className="w-4 h-4 mr-2" />
+                Change Password
+              </Button>
+            </div>
+            <Separator />
+            <div>
+              <Label className="text-sm text-gray-500">Account Status</Label>
+              <div className="flex items-center space-x-2 mt-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium">Active</span>
+              </div>
+            </div>
+            {user?.passwordChangedAt && (
+              <div>
+                <Label className="text-sm text-gray-500">Last Password Change</Label>
+                <p className="text-sm">{format(new Date(user.passwordChangedAt), 'MMM dd, yyyy')}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Edit Form - Only for Employers */}
+        {editing && user?.role === 'employer' && (
+          <Card className="bg-white rounded-2xl border border-gray-200 lg:col-span-3">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
@@ -418,11 +442,11 @@ const Me = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="submit" disabled={loading}>
+                    <Button type="submit" disabled={loading} className="bg-black hover:bg-gray-800 text-white">
                       <Save className="w-4 h-4 mr-2" />
                       {loading ? 'Saving...' : 'Save Changes'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setEditing(false)}>
+                    <Button type="button" variant="outline" onClick={() => setEditing(false)} className="border-black text-black hover:bg-gray-50">
                       Cancel
                     </Button>
                   </div>
@@ -430,10 +454,10 @@ const Me = () => {
               </CardContent>
             </Card>
           )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
 export default Me;
+

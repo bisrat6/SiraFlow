@@ -12,6 +12,7 @@
     "test:fixes": "node scripts/test-fixes.js",
     "test:signup": "node scripts/test-signup-fix.js",
     "migrate:indexes": "node scripts/migrate-indexes.js",
+    "create:super-admin": "node scripts/create-super-admin.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

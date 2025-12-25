@@ -2,7 +2,20 @@ const { validationResult } = require("express-validator");
 const Employee = require("../models/Employee");
 const User = require("../models/User");
 const Company = require("../models/Company");
+const JobRole = require("../models/JobRole");
 const { sendEmployeeWelcomePassword } = require("../services/emailService");
+
+
+const generatePassword = () => {
+  // use this if its in development mode
+  if (process.env.NODE_ENV === "development") {
+    return "Password123!";
+  }
+  // use this if its in production mode
+  if (process.env.NODE_ENV === "production") {
+    return Math.random().toString(36).slice(-10);
+  }
+}
 
 // Add new employee
 const addEmployee = async (req, res) => {
@@ -26,7 +39,7 @@ const addEmployee = async (req, res) => {
     let isNewUser = false;
     if (!user) {
       // Create user account for employee with a randomly generated password
-      tempPassword = Math.random().toString(36).slice(-10);
+      tempPassword = generatePassword();
       console.log("Temporary password for new employee:", tempPassword);
       user = new User({
         email,
@@ -67,8 +80,8 @@ const addEmployee = async (req, res) => {
       }
     }
 
-    // Note: the generated password is emailed to the employee; it is not returned in the API response.
-    res.status(201).json({
+    // Return the temporary password in the response for the employer to share with the employee
+    const response = {
       message: "Employee added successfully",
       employee: {
         id: employee._id,
@@ -80,7 +93,15 @@ const addEmployee = async (req, res) => {
         address: employee.address,
         isActive: employee.isActive,
       },
-    });
+    };
+
+    // Include temporary password if this is a new user (employer needs to share this with employee)
+    if (isNewUser && tempPassword) {
+      response.temporaryPassword = tempPassword;
+      response.message = "Employee added successfully. Please share the temporary password with the employee.";
+    }
+
+    res.status(201).json(response);
   } catch (error) {
     console.error("Add employee error:", error);
     res.status(500).json({ message: "Server error" });

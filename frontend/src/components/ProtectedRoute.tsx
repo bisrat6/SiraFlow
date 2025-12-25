@@ -3,7 +3,7 @@ import { isAuthenticated, getCurrentUser } from '@/lib/auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'employer' | 'employee';
+  requiredRole?: 'employer' | 'employee' | 'super_admin';
 }
 
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
@@ -14,7 +14,10 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   if (requiredRole) {
     const user = getCurrentUser();
     if (user?.role !== requiredRole) {
-      return <Navigate to="/" replace />;
+      // Redirect to the user's appropriate dashboard instead of "/"
+      const correctRoute = user?.role === 'super_admin' ? '/super-admin' :
+                          user?.role === 'employer' ? '/employer' : '/employee';
+      return <Navigate to={correctRoute} replace />;
     }
   }
 

@@ -129,4 +129,36 @@ export const analyticsApi = {
     api.get('/analytics', { params }),
 };
 
+// Contact API
+export const contactApi = {
+  submit: (data: { name: string; email: string; subject: string; message: string }) =>
+    api.post('/contacts/submit', data),
+  getAll: (params?: { status?: string; page?: number; limit?: number }) =>
+    api.get('/contacts', { params }),
+  getOne: (id: string) => api.get(`/contacts/${id}`),
+  reply: (id: string, data: { message: string }) =>
+    api.post(`/contacts/${id}/reply`, data),
+  updateStatus: (id: string, data: { status: string }) =>
+    api.patch(`/contacts/${id}/status`, data),
+  delete: (id: string) => api.delete(`/contacts/${id}`),
+  getStats: () => api.get('/contacts/stats'),
+};
+
+// SuperAdmin API
+export const superAdminApi = {
+  getDashboardStats: () => api.get('/super-admin/dashboard/stats'),
+  getAnalytics: () => api.get('/super-admin/analytics'),
+  getAllCompanies: (params?: { page?: number; limit?: number }) =>
+    api.get('/super-admin/companies', { params }),
+  getCompanyDetails: (id: string) => api.get(`/super-admin/companies/${id}`),
+  verifyCompany: (id: string, data: { status: string; rejectionReason?: string }) =>
+    api.post(`/super-admin/companies/${id}/verify`, data),
+  suspendCompany: (id: string, data: { suspend: boolean; reason?: string }) =>
+    api.post(`/super-admin/companies/${id}/suspend`, data),
+  getAllUsers: (params?: { role?: string; page?: number; limit?: number }) =>
+    api.get('/super-admin/users', { params }),
+  toggleUserStatus: (id: string, data: { isActive: boolean }) =>
+    api.post(`/super-admin/users/${id}/toggle-status`, data),
+};
+
 export default api;

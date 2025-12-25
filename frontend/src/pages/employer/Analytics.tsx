@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, BarChart3, TrendingUp, Users, Clock, DollarSign, Calendar } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Clock, DollarSign, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { analyticsApi, paymentApi } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const Analytics = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
@@ -98,24 +97,15 @@ const Analytics = () => {
   })) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/employer')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <h1 className="text-xl font-bold">Analytics</h1>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Payment Summary Cards */}
-        {paymentSummary && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <Card className="shadow-elegant gradient-card">
+    <DashboardLayout 
+      title="Analytics" 
+      subtitle="View comprehensive insights and reports on your workforce"
+      role="employer"
+    >
+      {/* Payment Summary Cards */}
+      {paymentSummary && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-600" />
@@ -127,7 +117,7 @@ const Analytics = () => {
               </CardContent>
             </Card>
             
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-blue-600" />
@@ -139,7 +129,7 @@ const Analytics = () => {
               </CardContent>
             </Card>
             
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-purple-600" />
@@ -151,7 +141,7 @@ const Analytics = () => {
               </CardContent>
             </Card>
             
-            <Card className="shadow-elegant gradient-card">
+            <Card className="bg-white rounded-2xl border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-orange-600" />
@@ -165,7 +155,7 @@ const Analytics = () => {
           </div>
         )}
 
-        <Card className="shadow-elegant gradient-card mb-6">
+        <Card className="bg-white rounded-2xl border border-gray-200 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
@@ -288,8 +278,7 @@ const Analytics = () => {
             </Card>
           </>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

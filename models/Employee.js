@@ -41,7 +41,8 @@ const employeeSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    trim: true
+    trim: true,
+    
   },
   address: {
     type: String,

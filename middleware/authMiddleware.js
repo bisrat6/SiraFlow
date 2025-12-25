@@ -60,9 +60,17 @@ const sameCompanyOrEmployer = async (req, res, next) => {
   }
 };
 
+const superAdminOnly = (req, res, next) => {
+  if (req.user.role !== 'super_admin') {
+    return res.status(403).json({ message: 'Access denied. Super admin privileges required.' });
+  }
+  next();
+};
+
 module.exports = {
   authMiddleware,
   employerOnly,
   employeeOnly,
-  sameCompanyOrEmployer
+  sameCompanyOrEmployer,
+  superAdminOnly
 };
